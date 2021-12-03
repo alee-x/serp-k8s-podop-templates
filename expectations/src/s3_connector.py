@@ -30,7 +30,7 @@ def get_conn_details() -> dict:
     s3_conn = {
         "endpoint": os.getenv("S3_ENDPOINT"),
         "access_key": os.getenv("S3_ACCESS_KEY"),
-        "access_secret": os.getenv("S3_SECRET_KEY")
+        "access_secret": os.getenv("S3_ACCESS_SECRET")
     }
     return s3_conn
 

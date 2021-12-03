@@ -101,7 +101,7 @@ def get_expectations(ledger) -> List[Dict]:
     get_expectation_url = "{0}/api/Expectation/Suite/{1}/{2}/{3}".format(nrda_backend_api_conn["host"],
                                                                          ledger['dataset_id'], ledger['label'],
                                                                          ledger['classification'])
-    logger.info("get expectations backend url: " + get_expectation_url)
+    logger.info("get expectations backend url: {0}".format(get_expectation_url))
 
     # use access_token for NRDAv2 API that was retrieved using Airflow account details
     api_call_headers = {'Authorization': 'Bearer ' + tokens['access_token']}
@@ -205,10 +205,10 @@ def add_expectations_to_suite(bucket_name, s3_suite_path, existing_expects_s3_pa
 
 
 if __name__ == "__main__":
-    bucket = sys.argv[0]
-    project = sys.argv[1]
-    ledger_path = sys.argv[2]
-    run_id = sys.argv[3]
+    bucket = sys.argv[1]
+    project = sys.argv[2]
+    ledger_path = sys.argv[3]
+    run_id = sys.argv[4]
 
     exist_expects_s3_path = expectations_init(bucket, project, ledger_path, run_id)
 
