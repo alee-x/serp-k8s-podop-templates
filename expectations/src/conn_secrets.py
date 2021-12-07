@@ -17,10 +17,11 @@ def get_nrda_conn() -> dict[str]:
     :return: A dictionary with one key, host, with value of the NRDA API endpoint URL as a string.
     :rtype: dict
     """
-    nrda_conn = {
-        "host": os.getenv("NRDAPI_HOST")
-    }
-    return nrda_conn
+    try:
+        nrda_conn = {"host": os.environ["NRDAPI_HOST"]}
+        return nrda_conn
+    except KeyError as e:
+        raise KeyError(e)
 
 
 def get_airflow_auth_conn() -> dict[str]:
@@ -29,9 +30,11 @@ def get_airflow_auth_conn() -> dict[str]:
     :return: A dictionary with 3 connection keys required to query the NRDA API.
     :rtype: dict
     """
-    af_oauth_conn = {
-        "host": os.getenv("AFOAUTH_HOST"),
-        "login": os.getenv("AFOAUTH_LOGIN"),
-        "password": os.getenv("AFOAUTH_PASS")
-    }
-    return af_oauth_conn
+    try:
+        af_oauth_conn = {"host": os.environ["AFOAUTH_HOST"],
+                         "login": os.environ["AFOAUTH_LOGIN"],
+                         "password": os.environ["AFOAUTH_PASS"]
+                         }
+        return af_oauth_conn
+    except KeyError as e:
+        raise KeyError(e)

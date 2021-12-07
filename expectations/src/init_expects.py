@@ -16,17 +16,16 @@ This file can be imported as a module and contains the following functions:
         suite, and saves the populated expectation suite back to S3.
 """
 import json
+import logging
 import sys
+from typing import List, Dict
 
 import requests
 from great_expectations.data_context import BaseDataContext
-from typing import List, Dict
 
-import s3_connector
-from conn_secrets import get_airflow_auth_conn, get_nrda_conn
-import expectations_config as expect_config
-
-import logging
+from .conn_secrets import get_airflow_auth_conn, get_nrda_conn
+from . import expectations_config as expect_config
+from . import s3_connector
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(module)s %(levelname)s: %(message)s',
@@ -53,7 +52,7 @@ def expectations_init(bucket_name, project_code, ledger_s3, dag_run_id) -> str:
     :rtype: str
     """
 
-    s3_client = s3_connector.make_s3_client()
+    s3_client = s3_connector.make_s3_client(s3_connector.get_conn_details())
     ledger_obj = s3_client.get_object(Bucket=bucket_name, Key=ledger_s3)
     ledger = json.loads(ledger_obj["Body"].read())
     nrda_expect_suite = get_expectations(ledger)
@@ -62,11 +61,7 @@ def expectations_init(bucket_name, project_code, ledger_s3, dag_run_id) -> str:
     # Store existing expectations to file on s3 to avoid issue of oversized arg for spark job
     s3_expect_json_path = "{0}/jobs/{1}/expects.json".format(project_code, dag_run_id)
 
-    s3_client.put_object(
-        Body=json.dumps(exist_expect_suite),
-        Bucket=bucket_name,
-        Key=s3_expect_json_path
-    )
+    s3_connector.put_item(exist_expect_suite, bucket_name, s3_expect_json_path, s3_client)
 
     return s3_expect_json_path
 
@@ -183,7 +178,7 @@ def add_expectations_to_suite(bucket_name, s3_suite_path, existing_expects_s3_pa
     :rtype: bool
     """
 
-    s3_client = s3_connector.make_s3_client()
+    s3_client = s3_connector.make_s3_client(s3_connector.get_conn_details())
     # get the empty suite
     suite_obj = s3_client.get_object(Bucket=bucket_name, Key=s3_suite_path)
     suite = json.loads(suite_obj['Body'].read())

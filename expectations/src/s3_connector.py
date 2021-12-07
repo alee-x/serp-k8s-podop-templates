@@ -9,12 +9,17 @@ This file can be imported as a module and contains the following functions:
         application pod as part of the file store.
     * make_s3_client - configures a boto3 client connection using either connection details passed to it, or credentials
         retrieved by get_conn_details if no connection credentials are passed as an argument.
+    * put_item - places a dict object to given path and bucket on S3 as a serialized JSON file. Creates the bucket if it
+        doesn't already exist.
 
 
 """
+import json
+import os
+
 import boto3
 from botocore.client import Config, BaseClient
-import os
+from botocore.exceptions import ParamValidationError, ClientError
 
 
 def get_conn_details() -> dict:
@@ -48,7 +53,47 @@ def make_s3_client(s3_conn=get_conn_details()) -> BaseClient:
     :return: The configured Boto3 client object that is ready to connect to the given S3 service.
     :rtype: BaseClient
     """
-    s3_client = boto3.client('s3', aws_access_key_id=s3_conn["access_key"],
-                             aws_secret_access_key=s3_conn["access_secret"], endpoint_url=s3_conn["endpoint"],
-                             config=Config(signature_version='s3v4'))
+    try:
+        s3_client = boto3.client('s3', aws_access_key_id=s3_conn["access_key"],
+                                 aws_secret_access_key=s3_conn["access_secret"], endpoint_url=s3_conn["endpoint"],
+                                 config=Config(signature_version='s3v4'))
+    except ValueError as e:
+        raise ValueError(e)
+
     return s3_client
+
+
+def put_item(object_to_put, bucket_name, target_path, s3_client) -> bool:
+    """Writes a given dict object to S3 in json format.
+
+    This method writes a given Python dictionary to JSON format and places it in the defined S3 bucket at the chosen
+    S3 path.
+
+    :param object_to_put: The object to put in S3, encoded as a dictionary
+    :type object_to_put: dict
+    :param bucket_name: The name of the bucket to put the item in. If the bucket doesn't exist this method will create
+        it.
+    :type bucket_name: str
+    :param target_path: The path on S3 (excl bucket name) to put the object to be stored.
+    :type target_path: str
+    :param s3_client: The pre-configured s3_client.
+    :type s3_client: BaseClient
+    :return: True if operation succeeded, raises errors otherwise.
+    :rtype: bool
+    """
+    try:
+        s3_client.create_bucket(Bucket=bucket_name)
+    except ClientError as e:
+        if e.response["Error"]["Code"] != "BucketAlreadyOwnedByYou":
+            raise ClientError(e)
+    try:
+        s3_client.put_object(
+            Body=json.dumps(object_to_put),
+            Bucket=bucket_name,
+            Key=target_path
+        )
+        return True
+    except ParamValidationError:
+        raise ParamValidationError()
+    except ClientError as e:
+        raise ClientError(e)
