@@ -1,10 +1,12 @@
+import json
+import os
 import time
+import logging
+import warnings
+from unittest import TestCase, mock, main
 
 from expectations.src import init_expects, s3_connector
 from . import super_env
-from unittest import TestCase, mock, main
-import os
-import json
 
 
 class Test(TestCase):
@@ -31,6 +33,8 @@ class Test(TestCase):
         cls.env_patcher.start()
         s3_client = s3_connector.make_s3_client(s3_connector.get_conn_details())
         s3_connector.put_item(s3_ledger, bucket_name, ledger_s3_path, s3_client)
+        logging.disable(logging.CRITICAL)
+        warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
         super().setUpClass()
 
     @classmethod

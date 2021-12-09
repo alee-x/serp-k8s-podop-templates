@@ -1,7 +1,5 @@
 import os
 from unittest import TestCase, mock, main
-import logging
-import warnings
 
 from botocore.client import BaseClient
 
@@ -19,8 +17,6 @@ class Test(TestCase):
         env_vars = super_env.get_s3_env()
         cls.env_patcher = mock.patch.dict(os.environ, env_vars)
         cls.env_patcher.start()
-        logging.disable(logging.CRITICAL)
-        warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
         super().setUpClass()
 
     @classmethod

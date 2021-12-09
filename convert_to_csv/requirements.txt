@@ -1,0 +1,4 @@
+boto3==1.18.60
+s3fs<=0.4
+pyreadstat==1.1.4
+fsspec==2021.11.1
