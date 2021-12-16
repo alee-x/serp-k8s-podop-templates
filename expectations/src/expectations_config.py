@@ -6,7 +6,7 @@ backend store for the Expectation Suite is a location on S3 that is defined in t
 
 """
 from great_expectations.data_context.types.base import DataContextConfig
-from . import s3_connector
+import s3_connector
 
 
 def get_expect_config(bucket_name, project_code, dag_run_id) -> DataContextConfig:

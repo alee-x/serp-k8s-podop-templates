@@ -23,9 +23,9 @@ from typing import List, Dict
 import requests
 from great_expectations.data_context import BaseDataContext
 
-from .conn_secrets import get_airflow_auth_conn, get_nrda_conn
-from . import expectations_config as expect_config
-from . import s3_connector
+from conn_secrets import get_airflow_auth_conn, get_nrda_conn
+import expectations_config as expect_config
+import s3_connector
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(module)s %(levelname)s: %(message)s',

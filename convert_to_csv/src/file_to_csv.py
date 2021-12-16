@@ -119,7 +119,8 @@ def convert_stata(local_target_file, target_file_path):
 
 def put_converted_file_s3(converted_df, extra_dfs, bucket_name, project_code, dag_run_id, target_file_path):
     converted_csv_name = target_file_path.split("/")[-1].split(".")[0]
-    converted_csv_path = "{0}/jobs/{1}/converted_files/{2}.csv".format(project_code, dag_run_id, converted_csv_name)
+    head_target_path = "/".join(target_file_path.split("/")[0:-1])
+    converted_csv_path = "{0}/{1}.csv".format(head_target_path, converted_csv_name)
 
     s3_conn = s3_connector.get_conn_details()
     s3_client = s3_connector.make_s3_client(s3_conn)
